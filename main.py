@@ -4,21 +4,58 @@ import math
 import utils
 
 from AbstractCar import *
-from CarFunctionalities import *
 
 TRACK = utils.scale_image(pygame.image.load("imgs/track.png"), 0.9)
 TRACK_BORDER = utils.scale_image(pygame.image.load("imgs/track-border.png"), 0.9)
 TRACK_BORDER_MASK = pygame.mask.from_surface(TRACK_BORDER)
-FINISH_START = pygame.image.load("imgs/finish.png")
-FINISH_START = pygame.transform.rotate(FINISH_START, 90)
-FINISH_END = pygame.image.load("imgs/finish.png")
-FINISH_END = pygame.transform.rotate(FINISH_END, 90)
-FINISH_START_MASK = pygame.mask.from_surface(FINISH_START)
-FINISH_END_MASK = pygame.mask.from_surface(FINISH_END)
-CAR = utils.scale_image(pygame.image.load("imgs/white-car.png"), 0.12)
+CAR = utils.scale_image(pygame.image.load("imgs/car.png"), 0.5)
 FPS = 60
 
 #######################################################################################
+def draw(window, images, player_car):
+    WINDOW.fill(white)
+    for image, positon in images:
+        window.blit(image,positon)
+    
+    player_car.drawCar(window)
+    pygame.display.update()
+
+
+def move_player(car):
+    if car.is_alive:
+
+        keys = pygame.key.get_pressed()
+        moved = False
+        if keys[pygame.K_LEFT]:
+            car.rotate(left=True, right=False)
+        if keys[pygame.K_RIGHT]:
+            car.rotate(right=True, left=False)
+        if keys[pygame.K_UP]:
+            moved = True
+            car.move_forward()
+        if keys[pygame.K_DOWN]:
+            if not keys[pygame.K_UP]:
+                moved = True
+                car.move_backward()
+
+        if not moved:
+            car.slow_down()
+
+def move_computer(cars, nets):
+    for i, car in enumerate(cars):
+            output = nets[i].activate(car.get_data())
+            choice = output.index(max(output))
+            if choice == 0:
+                car.angle += 10 # Left
+            elif choice == 1:
+                car.angle -= 10 # Right
+            else:
+                car.speed += .5 # Speed Up
+
+#######################################################################################
+
+
+
 
 WIDTH, HEIGHT = TRACK.get_width(), TRACK.get_height()
 WINDOW = pygame.display.set_mode((WIDTH, HEIGHT))
@@ -27,9 +64,9 @@ WINDOW.fill(white)
 pygame.display.set_caption("Car Driving Game")
 run_program = True
 clock = pygame.time.Clock()
-images = [(TRACK, (0,0)), (FINISH_START, (500,30))]
+images = [(TRACK, (0,0))]
 
-car = PlayerCar(4, 4)
+car = AbstractCar(4, 4)
 
 while run_program:
     clock.tick(FPS)
@@ -42,13 +79,8 @@ while run_program:
     move_player(car)
 
     if car.collide(TRACK_BORDER_MASK) is not None:
-        car = PlayerCar(4, 4)
+        car.is_alive = False
     
-    poi =  car.collide(FINISH_START_MASK, 500, 30)
-    if poi:
-        if poi[0] == 0:
-            car = PlayerCar(4, 4)
-        else:
-            print("finish")
+
 
 pygame.quit()
