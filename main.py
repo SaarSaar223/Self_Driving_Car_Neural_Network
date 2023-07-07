@@ -26,11 +26,9 @@ HEIGHT = TRACK.get_height()
 
 def run_simulation(genomes, config):
     
-    # Empty Collections For Nets and Cars
     nets = []
     cars = []
 
-    # Initialize PyGame And The Display
     pygame.init()
     screen = pygame.display.set_mode((WIDTH, HEIGHT))
 
@@ -42,17 +40,16 @@ def run_simulation(genomes, config):
 
         cars.append(Car())
 
-    # Clock Settings
-    # Font Settings & Loading Map
+
     clock = pygame.time.Clock()
     generation_font = pygame.font.SysFont("Arial", 30)
     alive_font = pygame.font.SysFont("Arial", 20)
-    game_map = pygame.image.load('imgs/track.png') # Convert Speeds Up A Lot
+    game_map = pygame.image.load('imgs/track.png') 
 
     global current_generation
     current_generation += 1
 
-    # Simple Counter To Roughly Limit Time (Not Good Practice)
+
     counter = 0
 
     while True:
